@@ -138,5 +138,48 @@ export default({ config, db }) => {
     });
   });
 
+
+// add analytics for a specific employee id
+// '/v1/venue/employee/analytics/add/:id'
+  api.post('/employee/analytics/add/:id', (req, res) => {
+    Employee.findById(req.params.id, (err, employee) => {
+      if (err) {
+        res.send(err);
+      }
+      let newAnalytics = new Analytics();
+
+      newAnalytics.date = req.body.date;
+      newAnalytics.hours = req.body.hours;
+      newAnalytics.totalSales = req.body.totalSales;
+      newAnalytics.totalItemsSold = req.body.totalItemsSold;
+      newAnalytics.comps = req.body.comps;
+      newAnalytics.spills = req.body.spills;
+      newAnalytics.employee = employee._id;
+      newAnalytics.save((err, analytics) => {
+        if (err) {
+          res.send(err);
+        }
+        employee.analytics.push(newAnalytics);
+        employee.save(err => {
+          if (err) {
+          res.send(err);
+          }
+          res.json({ message: "Shift Data Added"});
+        });
+      });
+    });
+  });
+// Get Analytics for a specific employee
+  api.get('/employees/analytics/:id', (req, res) => {
+  Analytics.find({employee: req.params.id}, (err, analytics) => {
+    if (err) {
+      res.send(err);
+    }
+    res.json(analytics);
+  });
+});
+
+
+
   return api;
 }
